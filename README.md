@@ -43,6 +43,10 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
    ![UI Overview](https://imgur.com/cAUcqlg.png)  
    ![UI Overview](https://i.imgur.com/yPWURa6.png)  
    *General UI showing user-friendly session controls and visualization.*
+4. **JSON Data**
+   ![Copy Data To JSON](https://i.imgur.com/BkEfDM4.png)  
+   *JSON Data*
+
 
 ---
 
