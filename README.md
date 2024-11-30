@@ -1,70 +1,112 @@
-# Getting Started with Create React App
+# Focus Session Analyzer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The **Focus Session Analyzer** is a React-based web application designed to track and analyze a user's focus while watching a YouTube video. Using **MediaPipe FaceMesh**, the app detects user gaze to determine focus levels and provides real-time visualizations along with a detailed session summary.
 
-## Available Scripts
+## Features
+1. **Real-Time Gaze Detection**:
+   - Tracks user gaze and determines if they are focused on the screen.
+   - Automatically pauses or resumes the video in "Pause Mode" based on user focus.
 
-In the project directory, you can run:
+2. **Session Analysis**:
+   - Collects data on focus intervals and generates a detailed analysis.
+   - Summarizes total focused and unfocused times with focus percentages.
 
-### `npm start`
+3. **Interactive Graphs**:
+   - Displays focus over time as a bar chart.
+   - Highlights session intervals with focus and unfocus percentages.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+4. **Customizable Modes**:
+   - **Pause Mode**: Automatically controls video playback based on focus.
+   - **Analyze Mode**: Tracks data without affecting video playback.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+5. **User-Friendly Interface**:
+   - Simple UI for starting and controlling sessions.
+   - Responsive charts and session summaries.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Screenshots
+    (soon wil added bruh)
+1. **Watching Video and Focus Graph**  
+   ![Watching Video and Focus Graph](#)  
+   *Real-time graph updates and playback control.*
 
-### `npm run build`
+2. **Session Summary**  
+   ![Final Analysis](#)  
+   *Detailed analysis of the session, including focus intervals and overall statistics.*
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Application UI**  
+   ![UI Overview](#)  
+   *General UI showing user-friendly session controls and visualization.*
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## How to Use
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-name>
+   ```
 
-### `npm run eject`
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. Access the app at `http://localhost:3000` in your browser.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Components Overview
+### `SessionForm`
+- Used to input session details, such as lecture title, YouTube URL, user name, and session mode.
+- Validates YouTube video URLs.
 
-## Learn More
+### `VideoPlayer`
+- Plays the selected YouTube video and tracks user gaze using **MediaPipe FaceMesh**.
+- Generates real-time focus data and updates the focus graph.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### `Summary`
+- Displays a detailed analysis of the session, including total focused time, unfocused intervals, and focus graphs.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### `Controls`
+- Provides pause/resume and end session controls.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Technologies Used
+- **React**: For building the user interface.
+- **Chart.js**: For rendering focus data as interactive bar charts.
+- **MediaPipe FaceMesh**: For detecting user gaze and focus.
+- **YouTube API**: For embedding and controlling video playback.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Main Code Block
+Here’s a quick reference for running the app locally:
 
-### Making a Progressive Web App
+```bash
+git clone <repository-url>
+cd <repository-name>
+npm install
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## Future Enhancements
+1. Add multi-user support for collaborative focus tracking.
+2. Integrate machine learning models for improved gaze detection.
+3. Expand session customization options, such as session time limits.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## License
+This project is licensed under the MIT License. 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Feel free to contribute and enhance! 🎉
