@@ -2,6 +2,10 @@
 
 The **Focus Session Analyzer** is a React-based web application designed to track and analyze a user's focus while watching a YouTube video. Using **MediaPipe FaceMesh**, the app detects user gaze to determine focus levels and provides real-time visualizations along with a detailed session summary.
 
+
+## Try It Now!
+[Click here now to try our app](https://the-jar-team.github.io/Analyze-Watching/)
+![Enjoy](https://i.imgur.com/mBfVZ5g.png)
 ## Features
 1. **Real-Time Gaze Detection**:
    - Tracks user gaze and determines if they are focused on the screen.
@@ -28,15 +32,16 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 ## Screenshots
     (soon wil added bruh)
 1. **Watching Video and Focus Graph**  
-   ![Watching Video and Focus Graph](#)  
+   ![Watching Video and Focus Graph](https://i.imgur.com/JpG41hA.png)  
    *Real-time graph updates and playback control.*
 
 2. **Session Summary**  
-   ![Final Analysis](#)  
+   ![Final Analysis](https://i.imgur.com/KLedGGb.png)  
    *Detailed analysis of the session, including focus intervals and overall statistics.*
 
 3. **Application UI**  
-   ![UI Overview](#)  
+   ![UI Overview](https://imgur.com/cAUcqlg)  
+   ![UI Overview](https://i.imgur.com/yPWURa6.png)  
    *General UI showing user-friendly session controls and visualization.*
 
 ---
