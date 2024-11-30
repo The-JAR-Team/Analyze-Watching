@@ -44,8 +44,7 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 ## How to Use
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-name>
+   git clone https://github.com/The-JAR-Team/Analyze-Watching.git
    ```
 
 2. Install dependencies:
@@ -91,8 +90,7 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 Here’s a quick reference for running the app locally:
 
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/The-JAR-Team/Analyze-Watching.git
 npm install
 npm start
 ```

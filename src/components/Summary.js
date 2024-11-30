@@ -1,9 +1,12 @@
 // Summary.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 function Summary({ sessionData, onRestartSession }) {
+  // Move useState to the top level
+  const [copySuccess, setCopySuccess] = useState('');
+
   if (!sessionData) {
     return <p>Error: No session data available.</p>;
   }
@@ -13,7 +16,6 @@ function Summary({ sessionData, onRestartSession }) {
   if (!lecture || !user || !summary || !chartData) {
     return <p>Error: Incomplete session data.</p>;
   }
-  const [copySuccess, setCopySuccess] = useState('');
 
   // Calculate total focused and unfocused time
   const totalIntervals = summary.focus_intervals?.length || 0;
@@ -79,7 +81,6 @@ function Summary({ sessionData, onRestartSession }) {
 
   console.log('Displaying summary:', sessionData);
 
-
   const handleCopyJSON = () => {
     const jsonData = JSON.stringify(sessionData, null, 2); // Pretty print JSON
 
@@ -108,7 +109,11 @@ function Summary({ sessionData, onRestartSession }) {
 
       try {
         const successful = document.execCommand('copy');
-        setCopySuccess('Session data copied to clipboard!');
+        if (successful) {
+          setCopySuccess('Session data copied to clipboard!');
+        } else {
+          setCopySuccess('Failed to copy session data.');
+        }
       } catch (err) {
         setCopySuccess('Failed to copy session data.');
         console.error('Fallback: Oops, unable to copy', err);
@@ -117,7 +122,6 @@ function Summary({ sessionData, onRestartSession }) {
       document.body.removeChild(textArea);
     }
   };
-
 
   return (
     <div className="summary">
@@ -161,8 +165,8 @@ function Summary({ sessionData, onRestartSession }) {
         </div>
       )}
 
-        <button onClick={handleCopyJSON}>Copy JSON to Clipboard</button>
-        {copySuccess && <p>{copySuccess}</p>}
+      <button onClick={handleCopyJSON}>Copy JSON to Clipboard</button>
+      {copySuccess && <p>{copySuccess}</p>}
       <button onClick={onRestartSession}>Back to Main</button>
     </div>
   );
