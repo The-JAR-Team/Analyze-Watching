@@ -30,7 +30,7 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 ---
 
 ## Screenshots
-    (soon wil added bruh)
+
 1. **Watching Video and Focus Graph**  
    ![Watching Video and Focus Graph](https://i.imgur.com/JpG41hA.png)  
    *Real-time graph updates and playback control.*
