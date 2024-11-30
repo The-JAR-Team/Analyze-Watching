@@ -271,6 +271,7 @@ function VideoPlayer({
           setUserFocusedState(true);
           focusedTime.current = 0;
           console.log('User is now focused');
+          // Resume video playback if in 'pause' mode
           if (!isPlaying && mode === 'pause' && playerRef.current) {
             playerRef.current.playVideo();
             setIsPlaying(true);

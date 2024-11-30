@@ -78,6 +78,46 @@ function Summary({ sessionData, onRestartSession }) {
 
   console.log('Displaying summary:', sessionData);
 
+
+  const handleCopyJSON = () => {
+    const jsonData = JSON.stringify(sessionData, null, 2); // Pretty print JSON
+
+    if (navigator.clipboard && window.isSecureContext) {
+      // Navigator clipboard API method
+      navigator.clipboard.writeText(jsonData).then(
+        function () {
+          setCopySuccess('Session data copied to clipboard!');
+        },
+        function (err) {
+          setCopySuccess('Failed to copy session data.');
+          console.error('Async: Could not copy text: ', err);
+        }
+      );
+    } else {
+      // Fallback method using textarea
+      const textArea = document.createElement('textarea');
+      textArea.value = jsonData;
+      // Avoid scrolling to bottom
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.position = 'fixed';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        setCopySuccess('Session data copied to clipboard!');
+      } catch (err) {
+        setCopySuccess('Failed to copy session data.');
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+
+      document.body.removeChild(textArea);
+    }
+  };
+
+
   return (
     <div className="summary">
       <h2>Session Summary</h2>
@@ -120,6 +160,8 @@ function Summary({ sessionData, onRestartSession }) {
         </div>
       )}
 
+        <button onClick={handleCopyJSON}>Copy JSON to Clipboard</button>
+        {copySuccess && <p>{copySuccess}</p>}
       <button onClick={onRestartSession}>Back to Main</button>
     </div>
   );
