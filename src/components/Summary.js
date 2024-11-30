@@ -13,6 +13,7 @@ function Summary({ sessionData, onRestartSession }) {
   if (!lecture || !user || !summary || !chartData) {
     return <p>Error: Incomplete session data.</p>;
   }
+  const [copySuccess, setCopySuccess] = useState('');
 
   // Calculate total focused and unfocused time
   const totalIntervals = summary.focus_intervals?.length || 0;
