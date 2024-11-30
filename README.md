@@ -5,7 +5,7 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 
 ## Try It Now!
 [Click here now to try our app](https://the-jar-team.github.io/Analyze-Watching/)
-![Enjoy](https://i.imgur.com/mBfVZ5g.png)(https://the-jar-team.github.io/Analyze-Watching/)
+[![Enjoy](https://i.imgur.com/mBfVZ5g.png)](https://the-jar-team.github.io/Analyze-Watching/)
 ## Features
 1. **Real-Time Gaze Detection**:
    - Tracks user gaze and determines if they are focused on the screen.
