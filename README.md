@@ -40,7 +40,7 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
    *Detailed analysis of the session, including focus intervals and overall statistics.*
 
 3. **Application UI**  
-   ![UI Overview](https://imgur.com/cAUcqlg)  
+   ![UI Overview](https://imgur.com/cAUcqlg.png)  
    ![UI Overview](https://i.imgur.com/yPWURa6.png)  
    *General UI showing user-friendly session controls and visualization.*
 
