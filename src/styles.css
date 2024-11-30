@@ -1,0 +1,87 @@
+/* styles.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2 {
+  margin-top: 20px;
+  color: #333;
+}
+
+form, .summary, .video-player {
+  background-color: #fff;
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form div, .summary div {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 12px 24px;
+  background-color: #4caf50;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 10px 5px;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+textarea {
+  background-color: #f9f9f9;
+}
+
+.status {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.focus-graph {
+  width: 80%;
+  margin: 20px auto;
+}
+
+.loading {
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+ul {
+  list-style-type: disc;
+  text-align: left;
+  margin-left: 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
