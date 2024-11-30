@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Analyze-Watching/static/css/main.dbb6a382.css",
+    "main.js": "/Analyze-Watching/static/js/main.9a9b36a1.js",
+    "index.html": "/Analyze-Watching/index.html",
+    "main.dbb6a382.css.map": "/Analyze-Watching/static/css/main.dbb6a382.css.map",
+    "main.9a9b36a1.js.map": "/Analyze-Watching/static/js/main.9a9b36a1.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dbb6a382.css",
+    "static/js/main.9a9b36a1.js"
+  ]
+}
