@@ -248,6 +248,7 @@ function VideoPlayer({
 
   const handleVideoPlayback = (gaze, deltaTime) => {
     // Console logs for debugging
+    console.log('isPlaying:', isPlaying);
     console.log('Gaze:', gaze);
     console.log('DeltaTime:', deltaTime);
     console.log(
@@ -272,7 +273,7 @@ function VideoPlayer({
           focusedTime.current = 0;
           console.log('User is now focused');
           // Resume video playback if in 'pause' mode
-          if (!isPlaying && mode === 'pause' && playerRef.current) {
+          if (mode === 'pause' && playerRef.current) {
             playerRef.current.playVideo();
             setIsPlaying(true);
             console.log('Video playback resumed');
@@ -295,7 +296,7 @@ function VideoPlayer({
           setUserFocusedState(false);
           unfocusedTime.current = 0;
           console.log('User is now unfocused');
-          if (isPlaying && mode === 'pause' && playerRef.current) {
+          if (mode === 'pause' && playerRef.current) {
             playerRef.current.pauseVideo();
             setIsPlaying(false);
             console.log('Video playback paused');
@@ -320,6 +321,17 @@ function VideoPlayer({
       event.target.pauseVideo();
     } else {
       event.target.playVideo();
+    }
+  };
+
+  // Add the onPlayerStateChange handler
+  const onPlayerStateChange = (event) => {
+    const playerState = event.data;
+    console.log('Player state changed:', playerState);
+    if (playerState === 1) { // Playing
+      setIsPlaying(true);
+    } else if (playerState === 2) { // Paused
+      setIsPlaying(false);
     }
   };
 
@@ -358,6 +370,7 @@ function VideoPlayer({
           },
         }}
         onReady={onPlayerReady}
+        onStateChange={onPlayerStateChange} // Attach the handler here
       />
       <p className="status">
         Current Status:{' '}

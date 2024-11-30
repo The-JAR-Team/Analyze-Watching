@@ -5,7 +5,7 @@ function SessionForm({ onStartSession }) {
   const [videoUrl, setVideoUrl] = useState('');
   const [userName, setUserName] = useState('');
   const [userProfile, setUserProfile] = useState('');
-  const [mode, setMode] = useState('pause');
+  const [mode, setMode] = useState('analyze');
 
   const extractVideoID = (url) => {
     const regex =
@@ -87,8 +87,9 @@ function SessionForm({ onStartSession }) {
       <div>
         <label>Mode:</label>
         <select value={mode} onChange={(e) => setMode(e.target.value)}>
+        <option value="analyze">Analyze Mode</option>
           <option value="pause">Pause Mode</option>
-          <option value="analyze">Analyze Mode</option>
+
         </select>
       </div>
       <button type="submit">Start Session</button>

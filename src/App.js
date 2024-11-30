@@ -10,7 +10,7 @@ function App() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionPaused, setSessionPaused] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
-  const [mode, setMode] = useState('pause'); // 'pause' or 'analyze'
+  const [mode, setMode] = useState('analyze'); // 'pause' or 'analyze'
   const [sessionData, setSessionData] = useState(null);
   const [lectureInfo, setLectureInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
@@ -32,6 +32,9 @@ function App() {
     setSessionEnded(false);
     setSessionData(null);
   };
+
+
+
 
   const handlePauseSession = () => {
     console.log('Session paused/resumed');
