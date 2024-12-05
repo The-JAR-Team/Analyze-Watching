@@ -107,9 +107,7 @@ npm start
 ---
 
 ## Future Enhancements
-1. Add multi-user support for collaborative focus tracking.
-2. Integrate machine learning models for improved gaze detection.
-3. Expand session customization options, such as session time limits.
+1. Secret for now :)
 
 ---
 

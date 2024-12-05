@@ -1,12 +1,23 @@
 // Summary.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
+import axios from 'axios'; // Import axios for HTTP requests
 
 function Summary({ sessionData, onRestartSession }) {
-  // Move useState to the top level
+  // Hooks must be called at the top level
   const [copySuccess, setCopySuccess] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState('');
 
+  // Ensure hooks are called unconditionally
+  useEffect(() => {
+    if (sessionData && focusPercentage) {
+      saveSessionData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Early returns can come after hooks
   if (!sessionData) {
     return <p>Error: No session data available.</p>;
   }
@@ -29,6 +40,23 @@ function Summary({ sessionData, onRestartSession }) {
   ).length;
   const focusPercentage = ((totalFocused / totalIntervals) * 100).toFixed(2);
 
+  // Define the function after focusPercentage is calculated
+  const saveSessionData = async () => {
+    try {
+      const response = await axios.post('https://tin-luck-measure.glitch.me/api/sessions', {
+        ...sessionData,
+        focusPercentage: parseFloat(focusPercentage),
+      });
+      setSaveSuccess('Session data saved to the server.');
+      console.log('Server response:', response.data);
+    } catch (error) {
+      setSaveSuccess('Failed to save session data to the server.');
+      console.error('Error saving session data:', error);
+    }
+  };
+
+  // The rest of your code remains the same...
+
   // Determine session quartiles
   const quartiles = [
     { range: '0-25%', intervals: [] },
@@ -50,7 +78,10 @@ function Summary({ sessionData, onRestartSession }) {
       const numUnfocusedIntervals = quartile.intervals.filter(
         (interval) => interval.percent_not_focused > 0
       ).length;
-      quartile.unfocusedPercentage = ((numUnfocusedIntervals / numIntervals) * 100).toFixed(2);
+      quartile.unfocusedPercentage = (
+        (numUnfocusedIntervals / numIntervals) *
+        100
+      ).toFixed(2);
     } else {
       quartile.unfocusedPercentage = 'N/A';
     }
@@ -149,11 +180,14 @@ function Summary({ sessionData, onRestartSession }) {
         {(summary.total_unfocused_time_ms / 1000).toFixed(2)} seconds
       </p>
 
+      {saveSuccess && <p>{saveSuccess}</p>}
+
       <h3>Unfocused Session Parts:</h3>
       <ul>
         {quartiles.map((quartile) => (
           <li key={quartile.range}>
-            Between {quartile.range} of the session: {quartile.unfocusedPercentage}% unfocused
+            Between {quartile.range} of the session:{' '}
+            {quartile.unfocusedPercentage}% unfocused
           </li>
         ))}
       </ul>

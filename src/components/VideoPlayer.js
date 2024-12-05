@@ -69,13 +69,24 @@ function VideoPlayer({
   const lastGazeTime = useRef(Date.now());
   const unfocusThreshold = 2000; // 2 seconds to become unfocused
   const focusThreshold = 2000; // 2 seconds to become focused
-  const graphUpdateInterval = 10000; // 10 seconds
+  const graphUpdateInterval = 3000; // 3 seconds for quicker updates
   const focusInterval = useRef(null);
 
-  // Move handleSessionEnd before useEffect
+  // For manual seek detection
+  const previousTimeRef = useRef(0); // Store the previous playback time
+  const [manualSeekDetected, setManualSeekDetected] = useState(false);
+  const seekThreshold = 1; // 1 second threshold to detect manual seek
+
+  // Periodic logging every 10 seconds
+  const periodicLogInterval = useRef(null);
+
+  // Handle session end
   const handleSessionEnd = () => {
     console.log('Session ended, processing data...');
     if (focusInterval.current) clearInterval(focusInterval.current);
+    if (manualSeekInterval.current) clearInterval(manualSeekInterval.current);
+    if (periodicLogInterval.current) clearInterval(periodicLogInterval.current);
+
     // Compute the summary
     const intervalDuration = graphUpdateInterval / 1000; // in seconds
     const intervals = focusData.map((focus, index) => {
@@ -122,6 +133,7 @@ function VideoPlayer({
       console.log('Session ended detected in VideoPlayer');
       handleSessionEnd();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionEnded]);
 
   useEffect(() => {
@@ -157,10 +169,19 @@ function VideoPlayer({
     // Start collecting focus data
     startFocusInterval();
 
+    // Start manual seek detection
+    startManualSeekDetection();
+
+    // Start periodic logging
+    startPeriodicLogging();
+
     return () => {
       // Cleanup
       if (focusInterval.current) clearInterval(focusInterval.current);
+      if (manualSeekInterval.current) clearInterval(manualSeekInterval.current);
+      if (periodicLogInterval.current) clearInterval(periodicLogInterval.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -178,8 +199,8 @@ function VideoPlayer({
       setFocusData((prevData) => {
         const newData = [...prevData, userFocused.current ? 1 : 0];
         const newLabels = newData.map(
-          (_, index) => ((index + 1) * graphUpdateInterval) / 1000
-        );
+          (_, index) => `${index * 3}-${(index + 1) * 3}s`
+        ); // 3-second intervals
         const newColors = newData.map((value) => (value === 1 ? 'green' : 'red'));
 
         setChartData({
@@ -194,10 +215,51 @@ function VideoPlayer({
             },
           ],
         });
-        console.log('Focus data updated:', newData);
+        // Removed frequent console logs
         return newData;
       });
     }, graphUpdateInterval);
+  };
+
+  // For manual seek detection
+  const manualSeekInterval = useRef(null);
+
+  const startManualSeekDetection = () => {
+    manualSeekInterval.current = setInterval(() => {
+      if (playerRef.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        const previousTime = previousTimeRef.current;
+
+        const timeDifference = Math.abs(currentTime - previousTime);
+
+        if (timeDifference > seekThreshold) {
+          console.log(
+            `Manual seek detected. Time jumped by ${timeDifference.toFixed(
+              2
+            )} seconds.`
+          );
+          setManualSeekDetected(true);
+          // Additional actions can be performed here
+        } else {
+          setManualSeekDetected(false);
+        }
+
+        // Update the previous time
+        previousTimeRef.current = currentTime;
+      }
+    }, 1000); // Check every second
+  };
+
+  // Periodic logging every 10 seconds
+  const startPeriodicLogging = () => {
+    periodicLogInterval.current = setInterval(() => {
+      console.log('--- Periodic Log ---');
+      console.log('Is Playing:', isPlaying);
+      console.log('User Focused:', userFocused.current);
+      console.log('Manual Seek Detected:', manualSeekDetected);
+      console.log('Focus Data:', focusData);
+      console.log('---------------------');
+    }, 10000); // Every 10 seconds
   };
 
   const onResults = (results) => {
@@ -247,16 +309,7 @@ function VideoPlayer({
   };
 
   const handleVideoPlayback = (gaze, deltaTime) => {
-    // Console logs for debugging
-    console.log('isPlaying:', isPlaying);
-    console.log('Gaze:', gaze);
-    console.log('DeltaTime:', deltaTime);
-    console.log(
-      'Before update - isLooking:',
-      isLooking.current,
-      'userFocused:',
-      userFocused.current
-    );
+    // Removed frequent console logs
 
     if (gaze === 'Looking center' && !sessionPaused) {
       if (!isLooking.current) {
@@ -266,7 +319,6 @@ function VideoPlayer({
       unfocusedTime.current = 0;
       if (!userFocused.current) {
         focusedTime.current += deltaTime;
-        console.log('Incremented focusedTime:', focusedTime.current);
         if (focusedTime.current >= focusThreshold) {
           userFocused.current = true;
           setUserFocusedState(true);
@@ -290,7 +342,6 @@ function VideoPlayer({
       focusedTime.current = 0;
       if (userFocused.current) {
         unfocusedTime.current += deltaTime;
-        console.log('Incremented unfocusedTime:', unfocusedTime.current);
         if (unfocusedTime.current >= unfocusThreshold) {
           userFocused.current = false;
           setUserFocusedState(false);
@@ -306,16 +357,9 @@ function VideoPlayer({
         unfocusedTime.current = 0;
       }
     }
-
-    console.log(
-      'After update - isLooking:',
-      isLooking.current,
-      'userFocused:',
-      userFocused.current
-    );
   };
 
-  const onPlayerReady = (event) => {
+  const onPlayerReadyHandler = (event) => {
     playerRef.current = event.target;
     if (sessionPaused) {
       event.target.pauseVideo();
@@ -327,11 +371,19 @@ function VideoPlayer({
   // Add the onPlayerStateChange handler
   const onPlayerStateChange = (event) => {
     const playerState = event.data;
-    console.log('Player state changed:', playerState);
-    if (playerState === 1) { // Playing
-      setIsPlaying(true);
-    } else if (playerState === 2) { // Paused
-      setIsPlaying(false);
+    // Player state codes: 1 = Playing, 2 = Paused, etc.
+    if (playerState === 1) {
+      // Playing
+      if (!isPlaying) {
+        setIsPlaying(true);
+        console.log('Video started playing');
+      }
+    } else if (playerState === 2) {
+      // Paused
+      if (isPlaying) {
+        setIsPlaying(false);
+        console.log('Video paused');
+      }
     }
   };
 
@@ -340,7 +392,7 @@ function VideoPlayer({
       x: {
         title: {
           display: true,
-          text: 'Time (s)',
+          text: 'Time Interval (s)',
         },
       },
       y: {
@@ -369,7 +421,7 @@ function VideoPlayer({
             autoplay: 1,
           },
         }}
-        onReady={onPlayerReady}
+        onReady={onPlayerReadyHandler}
         onStateChange={onPlayerStateChange} // Attach the handler here
       />
       <p className="status">
@@ -379,6 +431,9 @@ function VideoPlayer({
       <p className="status">
         Focused Status: {userFocusedState ? 'Focused' : 'Not Focused'}
       </p>
+      {manualSeekDetected && false && (
+        <p style={{ color: 'orange' }}>Manual seek detected!</p>
+      )}
       <div className="focus-graph">
         <Bar data={chartData} options={chartOptions} />
       </div>
