@@ -299,9 +299,9 @@ function VideoPlayer({
     const avgGazeRatio = (leftGazeRatio + rightGazeRatio) / 2;
 
     // Adjusted thresholds for leniency
-    if (avgGazeRatio < 0.4) {
+    if (avgGazeRatio < 0.42) {
       return 'Looking left';
-    } else if (avgGazeRatio > 0.6) {
+    } else if (avgGazeRatio > 0.58) {
       return 'Looking right';
     } else {
       return 'Looking center';
