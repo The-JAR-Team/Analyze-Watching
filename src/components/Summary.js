@@ -1,51 +1,27 @@
-// Summary.js
+// src/components/Summary.js
 
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import axios from 'axios'; // Import axios for HTTP requests
+import axios from 'axios';
 
 function Summary({ sessionData, onRestartSession }) {
-  // Hooks must be called at the top level
   const [copySuccess, setCopySuccess] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
 
-  // Ensure hooks are called unconditionally
   useEffect(() => {
-    if (sessionData && focusPercentage) {
+    if (sessionData) {
       saveSessionData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Early returns can come after hooks
-  if (!sessionData) {
-    return <p>Error: No session data available.</p>;
-  }
+  }, [sessionData]);
 
   const { lecture, user, summary, chartData } = sessionData;
 
-  if (!lecture || !user || !summary || !chartData) {
-    return <p>Error: Incomplete session data.</p>;
-  }
-
-  // Calculate total focused and unfocused time
-  const totalIntervals = summary.focus_intervals?.length || 0;
-
-  if (totalIntervals === 0) {
-    return <p>Error: No focus intervals data available.</p>;
-  }
-
-  const totalFocused = summary.focus_intervals.filter(
-    (interval) => interval.percent_not_focused === 0
-  ).length;
-  const focusPercentage = ((totalFocused / totalIntervals) * 100).toFixed(2);
-
-  // Define the function after focusPercentage is calculated
   const saveSessionData = async () => {
     try {
       const response = await axios.post('https://tin-luck-measure.glitch.me/api/sessions', {
         ...sessionData,
-        focusPercentage: parseFloat(focusPercentage),
+        focusPercentage: calculateFocusPercentage(),
       });
       setSaveSuccess('Session data saved to the server.');
       console.log('Server response:', response.data);
@@ -55,7 +31,15 @@ function Summary({ sessionData, onRestartSession }) {
     }
   };
 
-  // The rest of your code remains the same...
+  const calculateFocusPercentage = () => {
+    if (!summary || !summary.focus_intervals) return 0;
+    const total = summary.focus_intervals.length;
+    if (total === 0) return 0;
+    const focused = summary.focus_intervals.filter(
+      (interval) => interval.percent_not_focused === 0
+    ).length;
+    return ((focused / total) * 100).toFixed(2);
+  };
 
   // Determine session quartiles
   const quartiles = [
@@ -65,13 +49,11 @@ function Summary({ sessionData, onRestartSession }) {
     { range: '75-100%', intervals: [] },
   ];
 
-  // Assign intervals to quartiles
   summary.focus_intervals.forEach((interval, index) => {
-    const quartileIndex = Math.floor((index * 4) / totalIntervals);
+    const quartileIndex = Math.floor((index * 4) / summary.focus_intervals.length);
     quartiles[quartileIndex].intervals.push(interval);
   });
 
-  // Calculate unfocused percentage for each quartile
   quartiles.forEach((quartile) => {
     const numIntervals = quartile.intervals.length;
     if (numIntervals > 0) {
@@ -92,7 +74,7 @@ function Summary({ sessionData, onRestartSession }) {
       x: {
         title: {
           display: true,
-          text: 'Time (s)',
+          text: 'Time Interval (s)',
         },
       },
       y: {
@@ -108,9 +90,12 @@ function Summary({ sessionData, onRestartSession }) {
         },
       },
     },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
   };
-
-  console.log('Displaying summary:', sessionData);
 
   const handleCopyJSON = () => {
     const jsonData = JSON.stringify(sessionData, null, 2); // Pretty print JSON
@@ -158,7 +143,10 @@ function Summary({ sessionData, onRestartSession }) {
     <div className="summary">
       <h2>Session Summary</h2>
       <p>
-        <strong>Lecture Title:</strong> {lecture.title}
+        <strong>Lecture Subject:</strong> {lecture.subject}
+      </p>
+      <p>
+        <strong>Video ID:</strong> {lecture.videoId}
       </p>
       <p>
         <strong>User:</strong> {user.name}
@@ -173,7 +161,7 @@ function Summary({ sessionData, onRestartSession }) {
         <strong>Start Time:</strong> {lecture.start_time}
       </p>
       <p>
-        <strong>Focused Percentage:</strong> {focusPercentage}%
+        <strong>Focused Percentage:</strong> {calculateFocusPercentage()}%
       </p>
       <p>
         <strong>Total Unfocused Time:</strong>{' '}
@@ -199,9 +187,13 @@ function Summary({ sessionData, onRestartSession }) {
         </div>
       )}
 
-      <button onClick={handleCopyJSON}>Copy JSON to Clipboard</button>
+      <button onClick={handleCopyJSON} className="copy-button">
+        Copy JSON to Clipboard
+      </button>
       {copySuccess && <p>{copySuccess}</p>}
-      <button onClick={onRestartSession}>Back to Main</button>
+      <button onClick={onRestartSession} className="restart-button">
+        Back to Main
+      </button>
     </div>
   );
 }

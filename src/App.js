@@ -1,4 +1,4 @@
-// App.js
+// src/App.js
 
 import React, { useState } from 'react';
 import VideoPlayer from './components/VideoPlayer';
@@ -10,7 +10,7 @@ function App() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionPaused, setSessionPaused] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
-  const [mode, setMode] = useState('analyze'); // 'pause' or 'analyze'
+  const [mode, setMode] = useState('analyze'); // 'pause', 'question', or 'analyze'
   const [sessionData, setSessionData] = useState(null);
   const [lectureInfo, setLectureInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
@@ -33,9 +33,6 @@ function App() {
     setSessionData(null);
   };
 
-
-
-
   const handlePauseSession = () => {
     console.log('Session paused/resumed');
     setSessionPaused(!sessionPaused);
@@ -46,9 +43,9 @@ function App() {
     setSessionEnded(true);
   };
 
-  const handleSessionData = (data, chartData) => {
+  const handleSessionData = (data) => {
     console.log('Received session data:', data);
-    setSessionData({ ...data, chartData });
+    setSessionData(data);
   };
 
   const handleRestartSession = () => {
@@ -56,6 +53,9 @@ function App() {
     setSessionStarted(false);
     setSessionEnded(false);
     setSessionData(null);
+    setLectureInfo({});
+    setUserInfo({});
+    setMode('analyze');
   };
 
   return (
