@@ -640,21 +640,25 @@ function VideoPlayer({
       console.error('Question does not have a valid answers array:', question);
       return [];
     }
-
+  
+    // Create a shallow copy to prevent mutation
+    const answersCopy = [...question.answers];
+  
     // Find the correct answer
-    const correctAnswerIndex = question.answers.findIndex(ans => ans.correct);
-
+    const correctAnswerIndex = answersCopy.findIndex(ans => ans.correct);
+  
     if (correctAnswerIndex === -1) {
       console.warn('No correct answer found. Ensuring the first answer is marked as correct.');
       // If no answer is marked correct, default the first one
-      question.answers[0].correct = true;
-      return question.answers;
+      answersCopy[0].correct = true;
+      return answersCopy;
     }
-
-    // Move the correct answer to the first position
-    const [correctAnswer] = question.answers.splice(correctAnswerIndex, 1);
-    return [correctAnswer, ...question.answers];
+  
+    // Move the correct answer to the first position without mutating the original array
+    const [correctAnswer] = answersCopy.splice(correctAnswerIndex, 1);
+    return [correctAnswer, ...answersCopy];
   };
+  
 
   /**
    * Handles the user's answer selection.
