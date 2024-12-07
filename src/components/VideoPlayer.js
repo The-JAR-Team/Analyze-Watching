@@ -6,6 +6,7 @@ import { Camera } from '@mediapipe/camera_utils';
 import YouTube from 'react-youtube';
 import { Bar } from 'react-chartjs-2';
 import { fetchQuestionsForVideo } from '../services/api';
+import '../VideoPlayer.css'; // Import the CSS file
 
 // Import Chart.js components
 import {
@@ -30,17 +31,32 @@ ChartJS.register(
 
 // QuestionModal Component
 function QuestionModal({ question, onAnswer }) {
+  const firstButtonRef = useRef(null);
+  
+  useEffect(() => {
+    // Set focus to the first answer button when modal opens
+    if (firstButtonRef.current) {
+      firstButtonRef.current.focus();
+    }
+  }, []);
+  
   return (
-    <div className="modal-overlay">
+    <div
+      className="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="question-modal-title"
+    >
       <div className="modal-content">
-        <h3>Question:</h3>
+        <h3 id="question-modal-title">Question:</h3>
         <p>{question.question}</p>
         <div className="answers">
-          {question.shuffledAnswers.map((ans) => (
+          {question.shuffledAnswers.map((ans, index) => (
             <button
               key={ans.key}
               onClick={() => onAnswer(ans.key)}
               className="answer-button"
+              ref={index === 0 ? firstButtonRef : null} // Assign ref to first button
             >
               {ans.text}
             </button>
@@ -53,15 +69,30 @@ function QuestionModal({ question, onAnswer }) {
 
 // DecisionModal Component
 function DecisionModal({ isCorrect, onDecision }) {
+  const continueButtonRef = useRef(null);
+  
+  useEffect(() => {
+    // Set focus to the first decision button when modal opens
+    if (continueButtonRef.current) {
+      continueButtonRef.current.focus();
+    }
+  }, []);
+  
   return (
-    <div className="modal-overlay">
+    <div
+      className="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="decision-modal-title"
+    >
       <div className="modal-content">
-        <h3>{isCorrect ? 'Correct!' : 'Incorrect.'}</h3>
+        <h3 id="decision-modal-title">{isCorrect ? 'Correct!' : 'Incorrect.'}</h3>
         <p>What would you like to do?</p>
         <div className="decision-buttons">
           <button
             onClick={() => onDecision('continue')}
             className="decision-button"
+            ref={continueButtonRef} // Assign ref to first button
           >
             Continue Watching
           </button>
@@ -143,6 +174,20 @@ function VideoPlayer({
     ],
     time_start_I_can_ask_about_it: '00:00:00',
   };
+
+  // Effect to handle adding/removing no-scroll class on body
+  useEffect(() => {
+    if (showQuestionModal || showDecisionModal) {
+      document.body.classList.add('body-no-scroll');
+    } else {
+      document.body.classList.remove('body-no-scroll');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('body-no-scroll');
+    };
+  }, [showQuestionModal, showDecisionModal]);
 
   useEffect(() => {
     if (sessionEnded) {
