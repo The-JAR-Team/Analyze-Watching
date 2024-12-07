@@ -1,5 +1,3 @@
-// src/components/VideoPlayer.js
-
 import React, { useEffect, useRef, useState } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { Camera } from '@mediapipe/camera_utils';
@@ -164,6 +162,9 @@ function VideoPlayer({
   // **Ref to track if the session is frozen**
   const isFrozenRef = useRef(false);
 
+  ////, setpromptedQuestionsRef] = useState(0); // Track next question
+  const promptedQuestionsRef = useRef(new Set());
+
   const defaultQuestion = {
     question: 'Are you with us?',
     answers: [
@@ -173,6 +174,7 @@ function VideoPlayer({
       { key: 'answer4', text: 'Sleep', correct: false },
     ],
     time_start_I_can_ask_about_it: '00:00:00',
+    timeInSeconds: 0,
   };
 
   // Effect to handle adding/removing no-scroll class on body
@@ -235,9 +237,9 @@ function VideoPlayer({
       fetchQuestionsForVideo(lectureInfo.videoId)
         .then((fetchedQuestions) => {
           console.log('Fetched Questions:', fetchedQuestions);
-
+  
           let normalizedQuestions = [];
-
+  
           if (Array.isArray(fetchedQuestions)) {
             normalizedQuestions = fetchedQuestions.map((q) => {
               // Extract answers from individual properties
@@ -247,10 +249,11 @@ function VideoPlayer({
                 { key: 'answer3', text: q.answer3, correct: q.answer3_correct || false },
                 { key: 'answer4', text: q.answer4, correct: q.answer4_correct || false },
               ].filter(ans => ans.text); // Remove undefined answers
-
+  
               return {
                 ...q,
                 answers,
+                timeInSeconds: timeStringToSeconds(q.time_start_I_can_ask_about_it), // Add timeInSeconds
               };
             });
           } else if (fetchedQuestions && Array.isArray(fetchedQuestions.questions)) {
@@ -261,19 +264,32 @@ function VideoPlayer({
                 { key: 'answer3', text: q.answer3, correct: q.answer3_correct || false },
                 { key: 'answer4', text: q.answer4, correct: q.answer4_correct || false },
               ].filter(ans => ans.text); // Remove undefined answers
-
+  
               return {
                 ...q,
                 answers,
+                timeInSeconds: timeStringToSeconds(q.time_start_I_can_ask_about_it), // Add timeInSeconds
               };
             });
           } else {
             console.log('No questions available in fetched data.');
           }
-
+  
+          // Sort questions by timeInSeconds in ascending order
+          normalizedQuestions.sort((a, b) => a.timeInSeconds - b.timeInSeconds);
+  
+          // Define endTimeInSeconds for each question
+          normalizedQuestions = normalizedQuestions.map((q, index, arr) => {
+            const nextQuestion = arr[index + 1];
+            return {
+              ...q,
+              endTimeInSeconds: nextQuestion ? nextQuestion.timeInSeconds : Number.MAX_SAFE_INTEGER, // Last question's end time is video end
+            };
+          });
+  
           setQuestions(normalizedQuestions);
           questionsRef.current = normalizedQuestions; // Update ref
-          console.log(`Questions loaded: ${normalizedQuestions.length}`);
+          console.log(`Questions loaded and sorted: ${normalizedQuestions.length}`);
         })
         .catch((error) => {
           console.error('Error fetching questions:', error);
@@ -445,13 +461,19 @@ function VideoPlayer({
 
   const handleVideoPlayback = (gaze, deltaTime) => {
     console.log(`Gaze detected: ${gaze}`);
-
+  
     // **Check if the session is frozen**
     if (isFrozenRef.current) {
       console.log('Session is frozen. Skipping focus tracking.');
       return;
     }
-
+  
+    const player = playerRef.current;
+    if (!player) return;
+  
+    const currentVideoTime = player.getCurrentTime(); // Current time in seconds
+    console.log(`Current Video Time: ${currentVideoTime}s`);
+  
     if (gaze === 'Looking center' && !sessionPaused) {
       if (!isLooking.current) {
         isLooking.current = true;
@@ -459,25 +481,24 @@ function VideoPlayer({
         console.log('User started looking at center.');
       }
       unfocusedTime.current = 0;
-
+  
       if (!userFocused.current) {
         focusedTime.current += deltaTime;
         console.log(`Focused time accumulated: ${focusedTime.current}ms`);
-
+  
         if (focusedTime.current >= focusThreshold) {
           userFocused.current = true;
           setUserFocusedState(true);
           focusedTime.current = 0;
           console.log('User is now focused.');
-
+  
           // Resume video playback if in 'pause' mode
           if (
             mode === 'pause' &&
-            playerRef.current &&
             !showQuestionModal &&
             !showDecisionModal
           ) {
-            playerRef.current.playVideo();
+            player.playVideo();
             setIsPlaying(true);
             console.log('Video playback resumed.');
           }
@@ -492,121 +513,88 @@ function VideoPlayer({
         console.log('User stopped looking at center.');
       }
       focusedTime.current = 0;
-
+  
       if (userFocused.current) {
         unfocusedTime.current += deltaTime;
         console.log(`Unfocused time accumulated: ${unfocusedTime.current}ms`);
-
+  
         if (unfocusedTime.current >= unfocusThreshold) {
           userFocused.current = false;
           setUserFocusedState(false);
           unfocusedTime.current = 0;
           console.log('User is now unfocused.');
-
+  
           // Pause video playback if in 'pause' mode
-          if (mode === 'pause' && playerRef.current) {
-            playerRef.current.pauseVideo();
+          if (mode === 'pause') {
+            player.pauseVideo();
             setIsPlaying(false);
             console.log('Video playback paused.');
           }
-
+  
           // Trigger question prompt if in 'question' mode
-          if (
-            mode === 'question' &&
-            playerRef.current &&
-            !showQuestionModal &&
-            !showDecisionModal
-          ) {
-            const currentVideoTime = playerRef.current.getCurrentTime();
-            console.log(`Current video time: ${currentVideoTime}s`);
-
-            let matchedQuestion = getRandomQuestion(); // Select a random question
-            if (matchedQuestion) {
-              console.log(`Matched Question ID: ${matchedQuestion.q_id}`);
+          if (mode === 'question' && !showQuestionModal && !showDecisionModal) {
+            // Find all questions where currentVideoTime is within their time range and not yet prompted
+            const dueQuestions = questionsRef.current.filter(
+              (q) =>
+                q.timeInSeconds <= currentVideoTime &&
+                currentVideoTime < q.endTimeInSeconds// &&
+                //!promptedQuestionsRef.current.has(q.q_id)
+            );
+  
+            if (dueQuestions.length > 0) {
+              // Prompt the first due question
+              const questionToPrompt = dueQuestions[0];
+              console.log(`Prompting Question ID: ${questionToPrompt.q_id} at ${questionToPrompt.timeInSeconds}s`);
+              promptQuestion(questionToPrompt);
+              // Mark as prompted
+              promptedQuestionsRef.current.add(questionToPrompt.q_id);
             } else {
-              console.log('No matched question found. Using default question.');
+              console.log('No question to prompt at this time.');
             }
-
-            promptQuestion(matchedQuestion);
           }
         }
       } else {
         // User never focused before losing center
         if (
           mode === 'pause' &&
-          playerRef.current &&
           gaze !== 'Looking center' &&
           !showQuestionModal &&
           !showDecisionModal
         ) {
-          playerRef.current.pauseVideo();
+          player.pauseVideo();
           setIsPlaying(false);
           console.log('Video playback paused due to immediate unfocus.');
         }
-
+  
         if (
           mode === 'question' &&
-          playerRef.current &&
           !showQuestionModal &&
           !showDecisionModal &&
           gaze !== 'Looking center'
         ) {
-          const currentVideoTime = playerRef.current.getCurrentTime();
-          console.log(`Current video time: ${currentVideoTime}s`);
-
-          let matchedQuestion = getRandomQuestion(); // Select a random question
-          if (matchedQuestion) {
-            console.log(`Matched Question ID: ${matchedQuestion.q_id}`);
+          // Similar logic as above
+          const dueQuestions = questionsRef.current.filter(
+            (q) =>
+              q.timeInSeconds <= currentVideoTime &&
+              currentVideoTime < q.endTimeInSeconds &&
+              !promptedQuestionsRef.current.has(q.q_id)
+          );
+  
+          if (dueQuestions.length > 0) {
+            // Prompt the first due question
+            const questionToPrompt = dueQuestions[0];
+            console.log(`Prompting Question ID: ${questionToPrompt.q_id} at ${questionToPrompt.timeInSeconds}s`);
+            promptQuestion(questionToPrompt);
+            // Mark as prompted
+            promptedQuestionsRef.current.add(questionToPrompt.q_id);
           } else {
-            console.log('No matched question found. Using default question.');
+            console.log('No question to prompt at this time.');
           }
-
-          promptQuestion(matchedQuestion);
         }
       }
     }
   };
-
-  /**
-   * Selects a random question from the questions array.
-   * Ensures that the same question isn't selected consecutively.
-   * @returns {Object|null} A randomly selected question or null if no questions are available.
-   */
-  const getRandomQuestion = () => {
-    const questions = questionsRef.current;
-    const lastPromptedQuestionId = lastPromptedQuestionIdRef.current;
-
-    if (!questions || questions.length === 0) {
-      console.log('No questions available to select.');
-      return null;
-    }
-
-    // If only one question is available, return it
-    if (questions.length === 1) {
-      console.log(`Only one question available: ${questions[0].q_id}`);
-      return questions[0];
-    }
-
-    let attempts = 0;
-    const maxAttempts = 10; // Prevent infinite loops
-
-    while (attempts < maxAttempts) {
-      const randomIndex = Math.floor(Math.random() * questions.length);
-      const selectedQuestion = questions[randomIndex];
-
-      if (selectedQuestion.q_id !== lastPromptedQuestionId) {
-        console.log(`Selected Question ID: ${selectedQuestion.q_id}`);
-        return selectedQuestion;
-      }
-
-      attempts++;
-      console.log(`Attempt ${attempts}: Selected duplicate question ID: ${selectedQuestion.q_id}`);
-    }
-
-    // If all attempts result in duplicate questions, return null or handle as needed
-    console.log('All attempts resulted in duplicate questions. Using default question.');
-    return null;
-  };
+  
 
   /**
    * Prompts a question to the user.
@@ -614,30 +602,14 @@ function VideoPlayer({
    */
   const promptQuestion = (question) => {
     if (question) {
-      // Prevent prompting the same question multiple times in a row
-      if (question.q_id === lastPromptedQuestionIdRef.current) {
-        console.log(`Question ${question.q_id} has already been prompted. Selecting a new question.`);
-        question = getRandomQuestion(); // Select a new random question
-        if (!question) {
-          console.log('No new questions available. Using default question.');
-        }
-      }
-
-      if (question) {
-        const shuffledAnswers = shuffleAnswers(question);
-        if (shuffledAnswers.length === 0) {
-          console.log('Shuffled answers are empty. Using default question.');
-          question = null;
-        } else {
-          setCurrentQuestion({ ...question, shuffledAnswers });
-          console.log(`Prompting Question ID: ${question.q_id}`);
-          lastPromptedQuestionIdRef.current = question.q_id; // Update ref
-        }
+      const shuffledAnswers = shuffleAnswers(question);
+      if (shuffledAnswers.length === 0) {
+        console.log('Shuffled answers are empty. Using default question.');
+        question = null;
       } else {
-        const shuffledAnswers = shuffleAnswers(defaultQuestion);
-        setCurrentQuestion({ ...defaultQuestion, shuffledAnswers });
-        console.log('Prompting Default Question');
-        lastPromptedQuestionIdRef.current = null;
+        setCurrentQuestion({ ...question, shuffledAnswers });
+        console.log(`Prompting Question ID: ${question.q_id}`);
+        lastPromptedQuestionIdRef.current = question.q_id; // Update ref
       }
     } else {
       const shuffledAnswers = shuffleAnswers(defaultQuestion);
@@ -704,7 +676,7 @@ function VideoPlayer({
    */
   const handleDecision = (decision) => {
     console.log(`User decision: ${decision}`); // Debugging log
-
+  
     if (decision === 'continue') {
       setShowDecisionModal(false);
       setIsAnswerCorrect(null);
@@ -713,7 +685,7 @@ function VideoPlayer({
         setIsPlaying(true);
         console.log('User chose to continue watching');
       }
-
+  
       // **Unfreeze the session**
       isFrozenRef.current = false;
     } else if (decision === 'rewind') {
@@ -726,11 +698,12 @@ function VideoPlayer({
         setIsPlaying(true);
         console.log(`User chose to rewind to ${questionTimeSec}s`);
       }
-
+  
       // **Unfreeze the session**
       isFrozenRef.current = false;
     }
   };
+  
 
   const onPlayerReadyHandler = (event) => {
     playerRef.current = event.target;
