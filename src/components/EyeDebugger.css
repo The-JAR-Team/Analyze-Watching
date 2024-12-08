@@ -1,0 +1,30 @@
+/*EyeDebugger.css */
+
+.eye-debugger {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 200px; 
+    height: 150px; 
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; 
+  }
+  
+  .debug-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .debug-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; 
+  }
+  

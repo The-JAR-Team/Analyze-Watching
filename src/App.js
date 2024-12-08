@@ -5,6 +5,9 @@ import VideoPlayer from './components/VideoPlayer';
 import Controls from './components/Controls';
 import SessionForm from './components/SessionForm';
 import Summary from './components/Summary';
+import EyeDebugger from './components/EyeDebugger';
+
+
 
 function App() {
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -60,6 +63,13 @@ function App() {
 
   return (
     <div className="App">
+
+
+      {/* added this for debuggin my face.  */}
+     
+      <EyeDebugger enabled={false} />
+
+
       {!sessionStarted && !sessionEnded && (
         <SessionForm onStartSession={handleStartSession} />
       )}
