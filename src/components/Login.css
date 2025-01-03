@@ -1,0 +1,48 @@
+/* Login container styles */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Card styles */
+  .login-card {
+    text-align: center;
+    background: #ffffff;
+    padding: 40px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+    color: #333333;
+  }
+  
+  /* Title styles */
+  .login-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Subtitle styles */
+  .login-subtitle {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #555555;
+  }
+  
+  /* Button container */
+  .login-button {
+    margin-top: 20px;
+  }
+
+  .login-error {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
