@@ -50,6 +50,13 @@ The **Focus Session Analyzer** is a React-based web application designed to trac
 
 ---
 
+##
+IMPORTANT!
+do not forget to set env, or having .env file with the keys and correct values:
+REACT_APP_GOOGLE_CLIENT_ID
+REACT_APP_SERVER_URL
+##
+
 ## How to Use
 1. Clone the repository:
    ```bash

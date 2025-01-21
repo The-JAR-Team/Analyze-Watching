@@ -59,7 +59,8 @@ function App() {
       console.log('Google Login Successful. Token:', token);
 
       // Send the token to the server
-      const response = await fetch('http://localhost:5000/login', {
+      console.log(`${process.env.REACT_APP_SERVER_URL}/login`)
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

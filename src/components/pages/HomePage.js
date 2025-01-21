@@ -10,7 +10,7 @@ function HomePage({ userInfo, onNavigateToSession }) {
     // Fetch videos from the server
     const fetchVideos = async () => {
       try {
-        const response = await fetch('http://localhost:5000/videos');
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/videos`);
         const data = await response.json();
         if (data.success) {
           setVideos(data.videos);
